@@ -122,4 +122,4 @@ session.add(CatItem1)
 session.commit()
 
 
-print("added menu items!")
+print("added Weapons!")
