@@ -4,12 +4,11 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
 	</head>
 
-newRestaurant
 <body>
 <div class = 'pane quarter'>
 	<h1>Great Medieval Weapons Catalog</h1>
 
-	<a href="{{ url_for('newRestaurant') }}" > <h3> Create a New Category </h3> </a>
+	<a href="{{ url_for('newCategory')}}" > <h3> Create a New Category </h3> </a>
 
 	{% for category in categories %}
 
@@ -17,9 +16,9 @@ newRestaurant
 
 	<a class="category" href = "{{url_for('showCat', category_id = category.id)}}"> <p>{{category.name}}</p></a>
 
-	<p><a id="EditC" href = "{{url_for('editCategory', restaurant_id = category.id)}}">Edit Category</a></p>
+	<p><a id="EditC" href = "{{url_for('editCategory', category_id = category.id)}}">Edit Category</a></p>
 
-	<p> <a id="DelC" href = "{{url_for('deleteRestaurant', restaurant_id = category.id)}}">Delete Category</a> </p>
+	<p> <a id="DelC" href = "{{url_for('deleteCategory', category_id = category.id)}}">Delete Category</a> </p>
 
 
 
