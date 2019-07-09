@@ -1,0 +1,58 @@
+<html>
+
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+	<body>
+		<div class = 'pane'>
+		<h1>{{ category.name }}</h1>
+
+		{% with messages = get_flashed_messages() %}
+      {% if messages %}
+
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if items !=[] %}
+
+		<a href = "{{url_for('newMenuItem', restaurant_id = category.id)}}">Create New Item</a>
+	</br></br>
+
+	<h2>Weapons box</h2>
+
+		{% for i in items %}
+
+		<h3>{{i.name}}</h3>
+
+
+		<p>{{i.description}}</p>
+
+		<img src="{{url_for('static',filename= i.picture)}}" height="180" width="180">
+
+
+		<p> Date add: {{i.dateAdd}}</p>
+
+		<a href="{{url_for('editMenuItem', restaurant_id = category.id, menu_id = i.id)}}" >Edit</a>
+	</br>
+	<a href="{{url_for('deleteMenuItem', restaurant_id = category.id, menu_id = i.id)}}" >Delete</a>
+
+</br>
+</br>
+		{% endfor %}
+</br>
+
+		{% else %}
+		<p> You currently have no menu items. <p>
+		<a href = "{{url_for('newMenuItem', restaurant_id = category.id)}}">Create New Item</a>
+			{% endif %}
+</br>
+<a href="{{ url_for('showCategories') }}" > HOME </a>
+</div>
+	</body>
+
+</html>
