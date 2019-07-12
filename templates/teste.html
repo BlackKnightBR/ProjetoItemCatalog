@@ -1,0 +1,25 @@
+<html>
+
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+
+<body>
+<div class = 'pane quarter'>
+	<h1>Great Medieval Weapons Catalog</h1>
+
+	<a href="{{ url_for('newCategory',user_id = user_id)}}" > <h3> Create a New Category </h3> </a>
+
+	<p>Email: {{user.email}}</p>
+
+	<p>Password: {{user.password}}</p>
+
+	<p>User id: {{user.id}}</p>
+
+
+</div>
+
+</div>
+</body>
+
+</html>

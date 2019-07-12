@@ -11,7 +11,7 @@
 
 
 	<p>Name:</p>
-		<input type ='text' size='30' name='name'>
+		<input type ='text' size='30' name='name' required>
 
 
 <input type='submit' value='Create'>
@@ -19,7 +19,7 @@
 </form>
 
 </br>
-<a href="{{ url_for('showCategories') }}" > HOME </a>
+<a href="{{ url_for('showCategories',user_id=user_id) }}" > HOME </a>
 
 </body>
 </html>

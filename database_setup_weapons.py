@@ -1,8 +1,3 @@
-
-
-
-
-
 # The sys module provides a number of functions and variables that can be
 # used to manipulate different parts of the Python run-time environment.
 import sys
@@ -24,10 +19,26 @@ from sqlalchemy import create_engine
 # are special SQLAlchemy classes that correspond to tables in our database.
 Base = declarative_base()
 
+class User(Base):
+    __tablename__='user'
+    id = Column(Integer, primary_key = True)
+    email = Column(String(80), unique = True, nullable = False)
+    password = Column(String(6), nullable = False)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'email': self.email,
+        }
+
+
 class Categories(Base):
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
@@ -35,6 +46,7 @@ class Categories(Base):
         return {
             'name': self.name,
             'id': self.id,
+            'user_id': self.user_id,
         }
 
 
@@ -42,11 +54,13 @@ class CategoryItem(Base):
     __tablename__= 'category_item'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
-    description = Column(String(350))
-    picture = Column(String(350))
+    description = Column(String(350), nullable=False)
+    picture = Column(String(350), nullable=False)
     dateAdd= Column(DateTime, default=func.now())
     categories_id = Column(Integer, ForeignKey('categories.id'))
     categories = relationship(Categories)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
@@ -57,6 +71,7 @@ class CategoryItem(Base):
             'id': self.id,
             'picture': self.picture,
             'dateAdd': self.dateAdd,
+            'user_id': self.user_id,
         }
 
 ######### END of file ###########

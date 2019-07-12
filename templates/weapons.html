@@ -20,7 +20,7 @@
 
     {% if items !=[] %}
 
-		<a href = "{{url_for('newWeapon', category_id = category.id)}}">Create New Item</a>
+		<a href = "{{url_for('newWeapon', category_id = category.id, user_id=user_id)}}">Create New Item</a>
 	</br></br>
 
 	<h2>Weapons box</h2>
@@ -37,9 +37,9 @@
 
 		<p> Date add: {{i.dateAdd}}</p>
 
-		<a href="{{url_for('editWeapon', category_id = category.id, items_id = i.id)}}" >Edit</a>
+		<a href="{{url_for('editWeapon', category_id = category.id, items_id = i.id, user_id=user_id)}}" >Edit</a>
 	</br>
-	<a href="{{url_for('deleteWeapon', category_id = category.id, items_id = i.id)}}" >Delete</a>
+	<a href="{{url_for('deleteWeapon', category_id = category.id, items_id = i.id, user_id=user_id)}}" >Delete</a>
 
 </br>
 </br>
@@ -48,10 +48,10 @@
 
 		{% else %}
 		<p> You currently have no menu items. <p>
-		<a href = "{{url_for('newWeapon', category_id = category.id)}}">Create New Item</a>
+		<a href = "{{url_for('newWeapon', category_id = category.id, user_id=user_id)}}">Create New Item</a>
 			{% endif %}
 </br>
-<a href="{{ url_for('showCategories') }}" > HOME </a>
+<a href="{{ url_for('showCategories',user_id=user_id)}}" > HOME </a>
 </div>
 	</body>
 

@@ -15,13 +15,13 @@ a               {text-decoration: none; color:#FFFFCC; font-size: 25px;
                     border-color: #999999; background-color: #333333; }
 .header         {left:50%; text-align: center;}
 .name           {width:50%;display: inline-block; float: left;}
-.description    {}
-.price          {text-align: right; width:50%; float: right; }
-.editdeletepane {}
+.price          {text-align: right; width:50%; float: right;}
 
 .flash          { background: #cee5F5; }
 
 .category       {font-family: 'Sigmar One', cursive;}
+
+.itemspane      {margin-left: auto;margin-right: auto;}
 
 #EditC, #DelC   {font-family: 'Underdog', cursive;}
 #DelC           {font-size: 10px;}
