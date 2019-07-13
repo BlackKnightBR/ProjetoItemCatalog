@@ -47,11 +47,14 @@ def newUser():
     session = DBSession()
     if request.method == 'POST':
         newUser = User(email=request.form['newEmail'], password=request.form['newPassword'])
-        session.add(newUser)
-        session.commit()
-        return redirect(url_for('loginSession'))
+        try:
+            check = session.query(User).filter_by(email = newUser.email).one()
+            return render_template('userAlready.html', email = check.email)
+        except:
+            session.add(newUser)
+            session.commit()
+            return redirect(url_for('loginSession'))
     else:
-
         return render_template('newUser.html')
 
 
