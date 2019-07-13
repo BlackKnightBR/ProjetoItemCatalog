@@ -43,7 +43,17 @@ def logout():
 
 @app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
 def newUser():
-    return render_template('newUser.html')
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+    if request.method == 'POST':
+        newUser = User(email=request.form['newEmail'], password=request.form['newPassword'])
+        session.add(newUser)
+        session.commit()
+        return redirect(url_for('loginSession'))
+    else:
+
+        return render_template('newUser.html')
+
 
 # Login session
 @app.route('/', methods=['GET', 'POST'])
@@ -93,10 +103,12 @@ def editCategory(category_id, user_id):
     editedCategory = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        if request.form['name']:
-            editedCategory.name = request.form['name']
-            session.commit()
-            return redirect(url_for('showCat', category_id = category_id, user_id=user_id ))
+        if editedCategory.user_id == user_id:
+            if request.form['name']:
+                editedCategory.name = request.form['name']
+                session.commit()
+                return redirect(url_for('showCat', category_id = category_id, user_id=user_id ))
+        else: return render_template('noPermission.html', user_id=user_id, name=editedCategory.name)
     else:
         return render_template('editCategory.html', category=editedCategory, user_id=user_id)
 
@@ -109,9 +121,11 @@ def deleteCategory(category_id, user_id):
     categoryToDelete = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        session.delete(categoryToDelete)
-        session.commit()
-        return redirect(url_for('showCategories', user_id=user_id))
+        if categoryToDelete.user_id == user_id:
+            session.delete(categoryToDelete)
+            session.commit()
+            return redirect(url_for('showCategories', user_id=user_id))
+        else: return render_template('noDelete.html', user_id=user_id, name=categoryToDelete.name)
     else:
         return render_template(
             'deleteCategory.html', category=categoryToDelete, user_id=user_id)
@@ -150,17 +164,18 @@ def editWeapon(category_id, items_id, user_id):
     session = DBSession()
     editedItem = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        if request.form['name']:
-            editedItem.name = request.form['name']
-        if request.form['description']:
-            editedItem.description = request.form['description']
-        if request.form['picture']:
-            editedItem.price = request.form['picture']
-        session.add(editedItem)
-        session.commit()
-        return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
+        if editedItem.user_id == user_id:
+            if request.form['name']:
+                editedItem.name = request.form['name']
+            if request.form['description']:
+                editedItem.description = request.form['description']
+            if request.form['picture']:
+                editedItem.price = request.form['picture']
+            session.add(editedItem)
+            session.commit()
+            return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
+        else: return render_template('noPermission.html', user_id=user_id, name=editedItem.name)
     else:
-
         return render_template(
             'editWeapon.html', category_id=category_id, items_id=items_id, item=editedItem, user_id=user_id)
 
@@ -172,9 +187,11 @@ def deleteWeapon(category_id, items_id, user_id):
     session = DBSession()
     itemToDelete = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        session.delete(itemToDelete)
-        session.commit()
-        return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
+        if itemToDelete.user_id == user_id:
+            session.delete(itemToDelete)
+            session.commit()
+            return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
+        else: return render_template('noDelete.html', user_id=user_id, name=itemToDelete.name)
     else:
         return render_template('deleteWeapon.html', item=itemToDelete, user_id=user_id)
 
