@@ -37,9 +37,13 @@ def categoryJSON():
     return jsonify(categories=[r.serialize for r in categories])
 
 # Logout
-@app.route('/logout/')
+@app.route('/weaponsGuide/logout/')
 def logout():
     return render_template('login.html')
+
+@app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
+def newUser():
+    return render_template('newUser.html')
 
 # Login session
 @app.route('/', methods=['GET', 'POST'])

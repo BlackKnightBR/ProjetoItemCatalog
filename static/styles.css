@@ -26,3 +26,5 @@ a               {text-decoration: none; color:#FFFFCC; font-size: 25px;
 #EditC, #DelC   {font-family: 'Underdog', cursive;}
 #DelC           {font-size: 10px;}
 #EditC          {font-size: 15px;}
+#SignUp         {font-size: 15px; color: black; border-radius: 5px; background-color: lightgrey; border: 1px solid grey; padding:5px;}
+#SignUp :hover  {background-color: lightblue; font-style: italic;}
