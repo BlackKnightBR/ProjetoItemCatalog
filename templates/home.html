@@ -8,20 +8,20 @@
 <div class = 'pane quarter'>
 	<h1>Great Medieval Weapons Catalog</h1>
 
-	<h3>Loged email:{{email}}</h3></br>
+	<h3></h3></br>
 	<p><a href="{{url_for('logout')}}">Logout</a></p>
 
  <div class="itemspane">
 
-		<a href="{{ url_for('newCategory',user_id = user_id)}}" > <h3> Create a New Category </h3> </a>
+		<a href="{{ url_for('newCategory')}}" > <h3> Create a New Category </h3> </a>
 
 		{% for category in categories %}
 
-		<p><a class="category" href = "{{url_for('showCat', category_id = category.id, user_id = user_id)}}">{{category.name}}</a></p>
+		<p><a class="category" href = "{{url_for('showCat', category_id = category.id)}}">{{category.name}}</a></p>
 
-		<p><a id="EditC" href = "{{url_for('editCategory', category_id = category.id, user_id = user_id)}}">Edit Category</a></p>
+		<p><a id="EditC" href = "{{url_for('editCategory', category_id = category.id)}}">Edit Category</a></p>
 
-		<p> <a id="DelC" href = "{{url_for('deleteCategory', category_id = category.id, user_id = user_id)}}">Delete Category</a></p>
+		<p> <a id="DelC" href = "{{url_for('deleteCategory', category_id = category.id)}}">Delete Category</a></p>
 
 
 		{% endfor %}

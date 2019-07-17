@@ -2,8 +2,11 @@
 
 <head>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
-	</head>
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="801689158274-gikf3j7bul5evn4gl2fr43lhtahu20dn.apps.googleusercontent.com">
+</head>
 <body>
 <div class = 'pane quarter'>
   <form action="#" method = 'post'>
@@ -22,8 +25,37 @@
 	<a id="SignUp" href="{{url_for('newUser')}}">Sign up</a>
 	</br>
 	</br>
+	<div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <a href="#" onclick="signOut();">Sign out</a>
+  <br>
+	</div>
 
 </div>
 </body>
+
+<script type="text/javascript">
+  function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      if (profile) {
+  				// Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+  				$.ajax({
+  					type: 'POST',
+  					processData: false,
+  					data: {
+              id: profile.getId(),
+              email: profile.getEmail(),
+            },
+            url: '/gconnect',
+  				});
+			}
+    }
+
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+</script>
 
 </html>

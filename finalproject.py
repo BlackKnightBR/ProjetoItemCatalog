@@ -2,14 +2,19 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup_weapons import User, Categories, CategoryItem, Base
+from flask import session as login_session
+import secrets, random, string, json
 
 app = Flask(__name__)
+
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 
 engine = create_engine('sqlite:///weaponsGuide.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
 
 @app.route('/weaponsGuide/<int:category_id>/menu/JSON')
 def weaponsGuideJSON(category_id):
@@ -36,10 +41,22 @@ def categoryJSON():
     categories = session.query(Categories).all()
     return jsonify(categories=[r.serialize for r in categories])
 
+@app.route('/#')
+def newAtempt():
+    return redirect(url_for('loginSession'))
+
+#3d party oAuth
+@app.route('/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in range(32))
+    login_session['state'] = state
+    return render_template('login.html')
+
 # Logout
 @app.route('/weaponsGuide/logout/')
 def logout():
-    return render_template('login.html')
+    return redirect(url_for('loginSession'))
 
 @app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
 def newUser():
@@ -60,114 +77,121 @@ def newUser():
 
 # Login session
 @app.route('/', methods=['GET', 'POST'])
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/loginSession/', methods=['GET', 'POST'])
 def loginSession():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     if request.method == 'POST':
         try:
             user = session.query(User).filter_by(email=request.form['email'], password=request.form['password']).one()
-            return redirect(url_for('showCategories', user_id = user.id))
+            login_session['user_id'] = user.id
+            login_session['username'] = user.email
+            return redirect(url_for('showCategories'))
         except:
-            return render_template('login.html')
+            return  redirect(url_for('invalidLogin'))
     else:
         return render_template('login.html')
 
+@app.route('/invalidLogin')
+def invalidLogin():
+    login_session['user_id'] = ''
+    login_session['username'] = ''
+    return render_template('loginInvalido.html')
 
 #"This page will show all my categories"
-@app.route('/weaponsGuide/<int:user_id>/')
-def showCategories(user_id):
+@app.route('/weaponsGuide/')
+def showCategories():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     categories = session.query(Categories).all()
-    user = session.query(User).filter_by(id=user_id).one()
-    return render_template('home.html', categories = categories, user_id = user_id,email=user.email)
+    user = session.query(User).filter_by(id=login_session['user_id'] ).one()
+    return render_template('home.html', categories = categories)
 
 
 
 # Create a new category
-@app.route('/weaponsGuide/<int:user_id>/new/', methods=['GET', 'POST'])
-def newCategory(user_id):
+@app.route('/weaponsGuide/new/', methods=['GET', 'POST'])
+def newCategory():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     if request.method == 'POST':
-        newWeaponType = Categories(name=request.form['name'], user_id=user_id)
+        newWeaponType = Categories(name=request.form['name'], user_id=login_session['user_id'])
         session.add(newWeaponType)
         session.commit()
-        return redirect(url_for('showCategories', user_id=user_id))
+        return redirect(url_for('showCategories'))
     else:
-        return render_template('newCategory.html', user_id=user_id)
+        return render_template('newCategory.html')
 
 # Edit a category
-@app.route('/weaponsGuide/<int:category_id>/<int:user_id>/edit/', methods=['GET', 'POST'])
-def editCategory(category_id, user_id):
+@app.route('/weaponsGuide/<int:category_id>/edit/', methods=['GET', 'POST'])
+def editCategory(category_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     editedCategory = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        if editedCategory.user_id == user_id:
+        if editedCategory.user_id == login_session['user_id']:
             if request.form['name']:
                 editedCategory.name = request.form['name']
                 session.commit()
-                return redirect(url_for('showCat', category_id = category_id, user_id=user_id ))
-        else: return render_template('noPermission.html', user_id=user_id, name=editedCategory.name)
+                return redirect(url_for('showCat', category_id = category_id))
+        else: return render_template('noPermission.html', name=editedCategory.name)
     else:
-        return render_template('editCategory.html', category=editedCategory, user_id=user_id)
+        return render_template('editCategory.html', category=editedCategory)
 
 
 # Delete a category
-@app.route('/weaponsGuide/<int:category_id>/<int:user_id>/delete/', methods=['GET', 'POST'])
-def deleteCategory(category_id, user_id):
+@app.route('/weaponsGuide/<int:category_id>/delete/', methods=['GET', 'POST'])
+def deleteCategory(category_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     categoryToDelete = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        if categoryToDelete.user_id == user_id:
+        if categoryToDelete.user_id == login_session['user_id']:
             session.delete(categoryToDelete)
             session.commit()
-            return redirect(url_for('showCategories', user_id=user_id))
-        else: return render_template('noDelete.html', user_id=user_id, name=categoryToDelete.name)
+            return redirect(url_for('showCategories'))
+        else: return render_template('noDelete.html', name=categoryToDelete.name)
     else:
         return render_template(
-            'deleteCategory.html', category=categoryToDelete, user_id=user_id)
+            'deleteCategory.html', category=categoryToDelete)
 
 # Show a category items
-@app.route('/weaponsGuide/<int:category_id>/<int:user_id>/')
-@app.route('/weaponsGuide/<int:category_id>/<int:user_id>/items/')
-def showCat(category_id, user_id):
+@app.route('/weaponsGuide/<int:category_id>/')
+@app.route('/weaponsGuide/<int:category_id>/items/')
+def showCat(category_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     categories = session.query(Categories).filter_by(id=category_id).one()
     items = session.query(CategoryItem).filter_by(
         categories_id=category_id).all()
-    return render_template('weapons.html', items=items, category=categories, user_id=user_id)
+    return render_template('weapons.html', items=items, category=categories)
 
 # Create a new weapon
-@app.route('/weaponsGuide/<int:category_id>/<int:user_id>/weapon/new/', methods=['GET', 'POST'])
-def newWeapon(category_id, user_id):
+@app.route('/weaponsGuide/<int:category_id>/weapon/new/', methods=['GET', 'POST'])
+def newWeapon(category_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     if request.method == 'POST':
         newItem = CategoryItem(name=request.form['name'], description=request.form[
-                           'description'], picture=request.form['picture'], categories_id=category_id)
+                           'description'], picture=request.form['picture'], categories_id=category_id, user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
 
-        return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
+        return redirect(url_for('showCat', category_id=category_id))
     else:
-        return render_template('newWeapon.html', category_id=category_id, user_id=user_id)
+        return render_template('newWeapon.html', category_id=category_id)
 
 # Edit a weapon
-@app.route('/weaponsGuide/<int:category_id>/weapon/<int:items_id>/<int:user_id>/edit',
+@app.route('/weaponsGuide/<int:category_id>/weapon/<int:items_id>/edit',
            methods=['GET', 'POST'])
-def editWeapon(category_id, items_id, user_id):
+def editWeapon(category_id, items_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     editedItem = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        if editedItem.user_id == user_id:
+        if editedItem.user_id == login_session['user_id']:
             if request.form['name']:
                 editedItem.name = request.form['name']
             if request.form['description']:
@@ -176,29 +200,37 @@ def editWeapon(category_id, items_id, user_id):
                 editedItem.price = request.form['picture']
             session.add(editedItem)
             session.commit()
-            return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
-        else: return render_template('noPermission.html', user_id=user_id, name=editedItem.name)
+            return redirect(url_for('showCat', category_id=category_id))
+        else: return render_template('noPermission.html',name=editedItem.name)
     else:
-        return render_template(
-            'editWeapon.html', category_id=category_id, items_id=items_id, item=editedItem, user_id=user_id)
+        return render_template('editWeapon.html', category_id=category_id, items_id=items_id, item=editedItem)
 
 # Delete a weapon
-@app.route('/restaurant/<int:category_id>/weapon/<int:items_id>/<int:user_id>/delete',
+@app.route('/weaponsGuide/<int:category_id>/weapon/<int:items_id>/delete',
            methods=['GET', 'POST'])
-def deleteWeapon(category_id, items_id, user_id):
+def deleteWeapon(category_id, items_id):
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     itemToDelete = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        if itemToDelete.user_id == user_id:
+        if itemToDelete.user_id == login_session['user_id']:
             session.delete(itemToDelete)
             session.commit()
-            return redirect(url_for('showCat', category_id=category_id, user_id=user_id))
-        else: return render_template('noDelete.html', user_id=user_id, name=itemToDelete.name)
+            return redirect(url_for('showCat', category_id=category_id))
+        else: return render_template('noDelete.html',name=itemToDelete.name)
     else:
-        return render_template('deleteWeapon.html', item=itemToDelete, user_id=user_id)
+        return render_template('deleteWeapon.html', item=itemToDelete)
+
+
+@app.route('/gconnect', methods=['GET', 'POST'])
+def gconnect():
+    login_session['user_id'] = request.form['id']
+    login_session['email'] = request.form['email']
+
+    return redirect(url_for('showCategories'))
 
 
 if __name__ == '__main__':
     app.debug = True
+    app.secret_key = secrets.token_urlsafe(52)
     app.run(host='0.0.0.0', port=5000)
