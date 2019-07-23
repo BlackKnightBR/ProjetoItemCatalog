@@ -2,14 +2,23 @@
 
 <head>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
-	</head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="801689158274-gikf3j7bul5evn4gl2fr43lhtahu20dn.apps.googleusercontent.com">
+</head>
 
 <body>
 <div class = 'pane quarter'>
 	<h1>Great Medieval Weapons Catalog</h1>
 
 	<h3></h3></br>
+	<p><a href="{{url_for('loginSession')}}">Login</a></p>
 	<p><a href="{{url_for('logout')}}">Logout</a></p>
+	<a id="SignUp" href="{{url_for('newUser')}}">Sign up</a>
+	</br>
+	</br>
+	<div class="g-signin2" data-onsuccess="onSignIn"></div>
+	<a id="Glogout" class="glogout" href="#" onclick="signOut();">Sign out</a>
 
  <div class="itemspane">
 
@@ -29,6 +38,29 @@
 	</div>
 
 </div>
+
+<script type="text/javascript">
+	$('#Glogout').hide();
+
+	function onSignIn(googleUser) {
+		var profile = googleUser.getBasicProfile();
+		var mail = profile.getEmail();
+		$('#Glogout').show();
+		$.ajax({
+			type: "POST",
+			url: "/gconnect",
+			data: {mail:mail},
+		});
+	}
+
+	function signOut() {
+		var auth2 = gapi.auth2.getAuthInstance();
+		auth2.signOut().then(function () {
+			console.log('User signed out.');
+		});
+		$('#Glogout').hide();
+	}
+</script>
 </body>
 
 </html>

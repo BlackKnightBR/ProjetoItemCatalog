@@ -45,7 +45,7 @@ def categoryJSON():
 def newAtempt():
     return redirect(url_for('loginSession'))
 
-#3d party oAuth
+
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -56,7 +56,8 @@ def showLogin():
 # Logout
 @app.route('/weaponsGuide/logout/')
 def logout():
-    return redirect(url_for('loginSession'))
+    login_session['email'] = ''
+    return redirect(url_for('showCategories'))
 
 @app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
 def newUser():
@@ -76,7 +77,6 @@ def newUser():
 
 
 # Login session
-@app.route('/', methods=['GET', 'POST'])
 @app.route('/loginSession/', methods=['GET', 'POST'])
 def loginSession():
     DBSession = sessionmaker(bind=engine)
@@ -84,8 +84,7 @@ def loginSession():
     if request.method == 'POST':
         try:
             user = session.query(User).filter_by(email=request.form['email'], password=request.form['password']).one()
-            login_session['user_id'] = user.id
-            login_session['username'] = user.email
+            login_session['email'] = user.email
             return redirect(url_for('showCategories'))
         except:
             return  redirect(url_for('invalidLogin'))
@@ -94,17 +93,16 @@ def loginSession():
 
 @app.route('/invalidLogin')
 def invalidLogin():
-    login_session['user_id'] = ''
-    login_session['username'] = ''
+    login_session['email'] = ''
     return render_template('loginInvalido.html')
 
 #"This page will show all my categories"
+@app.route('/')
 @app.route('/weaponsGuide/')
 def showCategories():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     categories = session.query(Categories).all()
-    user = session.query(User).filter_by(id=login_session['user_id'] ).one()
     return render_template('home.html', categories = categories)
 
 
@@ -115,7 +113,7 @@ def newCategory():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     if request.method == 'POST':
-        newWeaponType = Categories(name=request.form['name'], user_id=login_session['user_id'])
+        newWeaponType = Categories(name=request.form['name'], owner=login_session['email'])
         session.add(newWeaponType)
         session.commit()
         return redirect(url_for('showCategories'))
@@ -130,7 +128,7 @@ def editCategory(category_id):
     editedCategory = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        if editedCategory.user_id == login_session['user_id']:
+        if editedCategory.owner == login_session['email']:
             if request.form['name']:
                 editedCategory.name = request.form['name']
                 session.commit()
@@ -148,7 +146,7 @@ def deleteCategory(category_id):
     categoryToDelete = session.query(
         Categories).filter_by(id=category_id).one()
     if request.method == 'POST':
-        if categoryToDelete.user_id == login_session['user_id']:
+        if categoryToDelete.owner == login_session['email']:
             session.delete(categoryToDelete)
             session.commit()
             return redirect(url_for('showCategories'))
@@ -175,7 +173,7 @@ def newWeapon(category_id):
     session = DBSession()
     if request.method == 'POST':
         newItem = CategoryItem(name=request.form['name'], description=request.form[
-                           'description'], picture=request.form['picture'], categories_id=category_id, user_id=login_session['user_id'])
+                           'description'], picture=request.form['picture'], categories_id=category_id, owner=login_session['email'])
         session.add(newItem)
         session.commit()
 
@@ -191,7 +189,7 @@ def editWeapon(category_id, items_id):
     session = DBSession()
     editedItem = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        if editedItem.user_id == login_session['user_id']:
+        if editedItem.owner == login_session['email']:
             if request.form['name']:
                 editedItem.name = request.form['name']
             if request.form['description']:
@@ -213,7 +211,7 @@ def deleteWeapon(category_id, items_id):
     session = DBSession()
     itemToDelete = session.query(CategoryItem).filter_by(id=items_id).one()
     if request.method == 'POST':
-        if itemToDelete.user_id == login_session['user_id']:
+        if itemToDelete.owner == login_session['email']:
             session.delete(itemToDelete)
             session.commit()
             return redirect(url_for('showCat', category_id=category_id))
@@ -221,13 +219,11 @@ def deleteWeapon(category_id, items_id):
     else:
         return render_template('deleteWeapon.html', item=itemToDelete)
 
-
-@app.route('/gconnect', methods=['GET', 'POST'])
+@app.route('/weaponsGuide/gconnect', methods=['POST'])
+@app.route('/gconnect', methods=['POST'])
 def gconnect():
-    login_session['user_id'] = request.form['id']
-    login_session['email'] = request.form['email']
-
-    return redirect(url_for('showCategories'))
+    login_session['email'] = request.form['mail']
+    return "loged"
 
 
 if __name__ == '__main__':

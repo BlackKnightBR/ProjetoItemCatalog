@@ -37,7 +37,7 @@ class Categories(Base):
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    owner = Column(String(80), ForeignKey('user.email'))
     user = relationship(User)
 
     @property
@@ -46,7 +46,7 @@ class Categories(Base):
         return {
             'name': self.name,
             'id': self.id,
-            'user_id': self.user_id,
+            'owner': self.owner,
         }
 
 
@@ -59,7 +59,7 @@ class CategoryItem(Base):
     dateAdd= Column(DateTime, default=func.now())
     categories_id = Column(Integer, ForeignKey('categories.id'))
     categories = relationship(Categories)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    owner = Column(String(80), ForeignKey('user.email'))
     user = relationship(User)
 
     @property
@@ -71,7 +71,7 @@ class CategoryItem(Base):
             'id': self.id,
             'picture': self.picture,
             'dateAdd': self.dateAdd,
-            'user_id': self.user_id,
+            'owner': self.owner,
         }
 
 ######### END of file ###########
