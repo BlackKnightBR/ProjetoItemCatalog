@@ -16,13 +16,13 @@ ___
 
 ___
 
->###How to:
+>### How to:
 >> Inside the folder "ProjetoItemCatalog" run "python finalproject.py".
 >>> Check if Python 3 is the default Python version
 >>>> Otherwise you need to use "python'version' finalproject.py".
 >> In your navigation bar(browser),
 >>>type: "localhost:5000".
->>####Now your ready to have fun!
+>>#### Now your ready to have fun!
 
 ___
 
