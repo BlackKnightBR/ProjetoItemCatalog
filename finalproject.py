@@ -41,24 +41,11 @@ def categoryJSON():
     categories = session.query(Categories).all()
     return jsonify(categories=[r.serialize for r in categories])
 
-@app.route('/#')
-def newAtempt():
-    return redirect(url_for('loginSession'))
-
-
-@app.route('/login')
-def showLogin():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                    for x in range(32))
-    login_session['state'] = state
-    return render_template('login.html')
-
 # Logout
 @app.route('/weaponsGuide/logout/')
 def logout():
-    login_session['email'] = ''
+    login_session['email'] = 'Log in!'
     return redirect(url_for('showCategories'))
-
 
 #Creates a new user
 @app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
@@ -90,7 +77,6 @@ def initialLogin():
     return redirect(url_for('showCategories'))
 
 #"This page will show all my categories"
-
 @app.route('/weaponsGuide/', methods=['GET', 'POST'])
 def showCategories():
     DBSession = sessionmaker(bind=engine)
@@ -175,7 +161,8 @@ def newWeapon(category_id):
     session = DBSession()
     if request.method == 'POST':
         newItem = CategoryItem(name=request.form['name'], description=request.form[
-                           'description'], picture=request.form['picture'], categories_id=category_id, owner=login_session['email'])
+                           'description'], picture=request.form['picture'],
+                           categories_id=category_id, owner=login_session['email'])
         session.add(newItem)
         session.commit()
 
