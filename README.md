@@ -7,9 +7,9 @@ A great project for Udacity course Full Stack Web developer **bold text**.
 ___
 
 >### Technologies:
->> HTML
->> Javascript
->> Python 3
+>> HTML,
+>> Javascript,
+>> Python 3.  
 >>> flask
 >>> SQLAlchemy
 >>> Jinja
@@ -17,10 +17,10 @@ ___
 ___
 
 >###How to:
->> Inside the folder "ProjetoItemCatalog" run "python finalproject.py"
+>> Inside the folder "ProjetoItemCatalog" run "python finalproject.py".
 >>> Check if Python 3 is the default Python version
->>>> Otherwise you need to use "python'version' finalproject.py"
->> In your navigation bar(browser)
+>>>> Otherwise you need to use "python'version' finalproject.py".
+>> In your navigation bar(browser).
 >>>type: "localhost:5000"
 >>Now your ready to have fun!
 
