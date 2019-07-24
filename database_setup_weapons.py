@@ -19,11 +19,12 @@ from sqlalchemy import create_engine
 # are special SQLAlchemy classes that correspond to tables in our database.
 Base = declarative_base()
 
+
 class User(Base):
-    __tablename__='user'
-    id = Column(Integer, primary_key = True)
-    email = Column(String(80), unique = True, nullable = False)
-    password = Column(String(6), nullable = False)
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    email = Column(String(80), unique=True, nullable=False)
+    password = Column(String(6), nullable=False)
 
     @property
     def serialize(self):
@@ -51,12 +52,12 @@ class Categories(Base):
 
 
 class CategoryItem(Base):
-    __tablename__= 'category_item'
-    name = Column(String(80), nullable = False)
-    id = Column(Integer, primary_key = True)
+    __tablename__ = 'category_item'
+    name = Column(String(80), nullable=False)
+    id = Column(Integer, primary_key=True)
     description = Column(String(350), nullable=False)
     picture = Column(String(350), nullable=False)
-    dateAdd= Column(DateTime, default=func.now())
+    dateAdd = Column(DateTime, default=func.now())
     categories_id = Column(Integer, ForeignKey('categories.id'))
     categories = relationship(Categories)
     owner = Column(String(80), ForeignKey('user.email'))
@@ -74,12 +75,11 @@ class CategoryItem(Base):
             'owner': self.owner,
         }
 
-######### END of file ###########
+# Instance of our class create_engine pointing the database we will use.
 
-#Instance of our class create_engine pointing the database we will use.
-#The create_engine will create a new file similary to a more robust database.
+# The create_engine will create a new file similary to a more robust database.
 engine = create_engine(
-'sqlite:///weaponsGuide.db')
+    'sqlite:///weaponsGuide.db')
 
-#Add the classes as new tables in our database.
+# Add the classes as new tables in our database.
 Base.metadata.create_all(engine)
