@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup_weapons import User, Categories, CategoryItem, Base
 from flask import session as login_session
-import secrets, random, string, json
+import secrets, random, string, json, webbrowser
 
 app = Flask(__name__)
 
@@ -59,6 +59,8 @@ def logout():
     login_session['email'] = ''
     return redirect(url_for('showCategories'))
 
+
+#Creates a new user
 @app.route('/weaponsGuide/newUser', methods=['GET', 'POST'])
 def newUser():
     DBSession = sessionmaker(bind=engine)
@@ -71,39 +73,37 @@ def newUser():
         except:
             session.add(newUser)
             session.commit()
-            return redirect(url_for('loginSession'))
+            return redirect(url_for('showCategories'))
     else:
         return render_template('newUser.html')
 
-
-# Login session
-@app.route('/loginSession/', methods=['GET', 'POST'])
-def loginSession():
-    DBSession = sessionmaker(bind=engine)
-    session = DBSession()
-    if request.method == 'POST':
-        try:
-            user = session.query(User).filter_by(email=request.form['email'], password=request.form['password']).one()
-            login_session['email'] = user.email
-            return redirect(url_for('showCategories'))
-        except:
-            return  redirect(url_for('invalidLogin'))
-    else:
-        return render_template('login.html')
 
 @app.route('/invalidLogin')
 def invalidLogin():
     login_session['email'] = ''
     return render_template('loginInvalido.html')
 
-#"This page will show all my categories"
+#This request starts the login_session
 @app.route('/')
-@app.route('/weaponsGuide/')
+def initialLogin():
+    login_session['email'] = "Log in!"
+    return redirect(url_for('showCategories'))
+
+#"This page will show all my categories"
+
+@app.route('/weaponsGuide/', methods=['GET', 'POST'])
 def showCategories():
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
     categories = session.query(Categories).all()
-    return render_template('home.html', categories = categories)
+    if request.method == 'POST':
+        try:
+            user = session.query(User).filter_by(email=request.form['email'], password=request.form['password']).one()
+            login_session['email'] = user.email
+            return render_template('home.html', categories = categories, email = login_session['email'])
+        except:
+            return  redirect(url_for('invalidLogin'))
+    return render_template('home.html', categories = categories, email= login_session['email'])
 
 
 
@@ -145,6 +145,8 @@ def deleteCategory(category_id):
     session = DBSession()
     categoryToDelete = session.query(
         Categories).filter_by(id=category_id).one()
+    categoryItems = session.query(CategoryItem
+        ).filter_by(categories_id = category_id).all()
     if request.method == 'POST':
         if categoryToDelete.owner == login_session['email']:
             session.delete(categoryToDelete)
